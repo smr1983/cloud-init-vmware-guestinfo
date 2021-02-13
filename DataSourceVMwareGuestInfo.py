@@ -35,6 +35,8 @@ from cloudinit import log as logging
 from cloudinit import sources
 from cloudinit import util
 from cloudinit import safeyaml
+from cloudinit.sources.helpers.vmware.imc import guestcust_util
+from cloudinit.sources.DataSourceOVF import wait_for_imc_cfg_file
 
 import netifaces
 
@@ -56,7 +58,6 @@ CLEANUP_GUESTINFO = 'cleanup-guestinfo'
 WAIT_ON_NETWORK = 'wait-on-network'
 WAIT_ON_NETWORK_IPV4 = 'ipv4'
 WAIT_ON_NETWORK_IPV6 = 'ipv6'
-
 
 class NetworkConfigError(Exception):
     '''
@@ -112,6 +113,14 @@ class DataSourceVMwareGuestInfo(sources.DataSource):
         if not get_data_access_method():
             LOG.error("Failed to find vmware-rpctool")
 
+    def enable_nics(self):
+        nicspath = wait_for_imc_cfg_file(
+            filename="nics.txt", maxwait=4, naplen=5)
+        if nicspath is not None:
+            vmware_nics_to_enable = guestcust_util.get_nics_to_enable(nicspath)
+            LOG.info("enable nics: %s", vmware_nics_to_enable)
+            guestcust_util.enable_nics(vmware_nics_to_enable)
+
     def get_data(self):
         """
         This method should really be _get_data in accordance with the most
@@ -154,7 +163,7 @@ class DataSourceVMwareGuestInfo(sources.DataSource):
         per 'fallback' or per 'network_config' will have been written and
         brought up the OS at this point.
         """
-
+        self.enable_nics()
         host_info = wait_on_network(self.metadata)
         LOG.info("got host-info: %s", host_info)
 
@@ -306,7 +315,6 @@ def handle_returned_guestinfo_val(key, val):
         return val
     LOG.debug("No value found for key %s", key)
     return None
-
 
 def get_guestinfo_value(key):
     '''
