@@ -36,7 +36,6 @@ from cloudinit import sources
 from cloudinit import util
 from cloudinit import safeyaml
 from cloudinit.sources.helpers.vmware.imc import guestcust_util
-from cloudinit.sources.DataSourceOVF import wait_for_imc_cfg_file
 
 import netifaces
 
@@ -677,7 +676,19 @@ def get_host_info():
                 by_ipv6[key] = val
 
     return host_info
+    
+def wait_for_imc_cfg_file(filename, maxwait=180, naplen=5,
+                          dirpath="/var/run/vmware-imc"):
+    waited = 0
 
+    while waited < maxwait:
+        fileFullPath = os.path.join(dirpath, filename)
+        if os.path.isfile(fileFullPath):
+            return fileFullPath
+        LOG.debug("Waiting for VMware Customization Config File")
+        time.sleep(naplen)
+        waited += naplen
+    return None
 
 def wait_on_network(metadata):
     # Determine whether we need to wait on the network coming online.
