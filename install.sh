@@ -12,7 +12,7 @@ set -e
 REPO_SLUG="${REPO_SLUG:-https://raw.githubusercontent.com/smr1983/cloud-init-vmware-guestinfo}"
 
 # The git reference to use. This can be a branch or tag name as well as a commit ID.
-GIT_REF="GIT_REF="${GIT_REF:-master}"
+GIT_REF="${GIT_REF:-master}"
 
 if ! command -v curl >/dev/null 2>&1; then
   echo "curl is required" 1>&2
