@@ -36,6 +36,12 @@ from cloudinit import sources
 from cloudinit import util
 from cloudinit import safeyaml
 from cloudinit.sources.helpers.vmware.imc import guestcust_util
+from cloudinit.sources.helpers.vmware.imc.guestcust_error \
+    import GuestCustErrorEnum
+from cloudinit.sources.helpers.vmware.imc.guestcust_event \
+    import GuestCustEventEnum as GuestCustEvent
+from cloudinit.sources.helpers.vmware.imc.guestcust_state \
+    import GuestCustStateEnum
 
 import netifaces
 
@@ -119,7 +125,11 @@ class DataSourceVMwareGuestInfo(sources.DataSource):
             vmware_nics_to_enable = guestcust_util.get_nics_to_enable(nicspath)
             LOG.info("enable nics: %s", vmware_nics_to_enable)
             guestcust_util.enable_nics(vmware_nics_to_enable)
-
+            guestcust_util.set_customization_status(
+                GuestCustStateEnum.GUESTCUST_STATE_DONE,
+                GuestCustErrorEnum.GUESTCUST_ERROR_SUCCESS)
+            guestcust_util.set_gc_status(self._vmware_cust_conf, "Successful")
+        
     def get_data(self):
         """
         This method should really be _get_data in accordance with the most
