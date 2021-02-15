@@ -128,7 +128,6 @@ class DataSourceVMwareGuestInfo(sources.DataSource):
             guestcust_util.set_customization_status(
                 GuestCustStateEnum.GUESTCUST_STATE_DONE,
                 GuestCustErrorEnum.GUESTCUST_ERROR_SUCCESS)
-            guestcust_util.set_gc_status(self._vmware_cust_conf, "Successful")
         
     def get_data(self):
         """
